@@ -75,6 +75,9 @@ func HandleUpload(kvStore *database.KVStore) gin.HandlerFunc {
 		}
 
 		ctx.JSON(200, gin.H{
+			"data": gin.H {
+				"key": key,
+			},
 			"message": "File Uploaded successfully",
 		})
 	}
