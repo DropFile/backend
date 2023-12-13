@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const filestorage string = "../../filestorage"
+const Filestorage string = "../../filestorage"
 
 func HandleUpload(kvStore *database.KVStore) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -25,7 +25,7 @@ func HandleUpload(kvStore *database.KVStore) gin.HandlerFunc {
 			return
 		}
 
-		fileStoragePath := fmt.Sprintf("%s/%s", filestorage, key)
+		fileStoragePath := fmt.Sprintf("%s/%s", Filestorage, key)
 		err = utils.CreateFolder(fileStoragePath)
 		if err != nil {
 			ctx.JSON(500, gin.H{
@@ -56,8 +56,7 @@ func HandleUpload(kvStore *database.KVStore) gin.HandlerFunc {
 
 				if err == nil {
 					fileName := strings.Replace(file.Filename, " ", "_", -1)
-					fileExtension, fileError := utils.GetFilExtension(fileName)
-					
+					fileExtension, fileError := utils.GetFileExtension(fileName)
 
 					if fileError != nil {
 						log.Printf("%s: %v\n", fileName, fileError)

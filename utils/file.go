@@ -12,7 +12,7 @@ func CreateFolder(folderPath string) error {
 	return err
 }
 
-func GetFilExtension(filename string) (string, error) {
+func GetFileExtension(filename string) (string, error) {
 	index := len(filename) - 1
 	for ; index >= 0; index-- {
 		if filename[index] == '.' {
@@ -30,6 +30,27 @@ func GetFilExtension(filename string) (string, error) {
 	}
 
 	return fileExtension, nil
+}
+
+func GetFileWithoutExtension(filename string) (string, error) {
+	index := len(filename) - 1
+	for ; index >= 0; index-- {
+		if filename[index] == '.' {
+			break
+		}
+	}
+
+	if index == -1 {
+		return "", errors.New("invalid file format")
+	}
+
+	fileNameWithoutExtension := ""
+	for num := 0; num < index; num++ {
+		fileNameWithoutExtension = fileNameWithoutExtension + string(filename[num])
+	}
+
+	fmt.Println(fileNameWithoutExtension)
+	return fileNameWithoutExtension, nil
 }
 
 func SegmentVideoFile(filePath string, fileName string) error {
