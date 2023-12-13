@@ -4,8 +4,10 @@ import (
 	// "net/http"
 	"cloud/backend/database"
 	"cloud/backend/routes"
-	"github.com/gin-gonic/gin"
 	"log"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 const dbPath string = "../../database"
@@ -20,6 +22,10 @@ func main() {
 	defer kvStore.Close()
 
 	router := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	router.Use(cors.New(config))
 
 	router.GET("/ping", routes.HandlePing())
 	router.POST("/db/test", routes.HandleSet(kvStore))
