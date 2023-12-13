@@ -75,10 +75,29 @@ func HandleUpload(kvStore *database.KVStore) gin.HandlerFunc {
 		}
 
 		ctx.JSON(200, gin.H{
-			"data": gin.H {
+			"data": gin.H{
 				"key": key,
 			},
 			"message": "File Uploaded successfully",
+		})
+	}
+}
+
+func HandleFileMetadata(kvStore *database.KVStore) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		key := ctx.Query("key")
+
+		values, err := kvStore.Get(key)
+		if err != nil {
+			ctx.JSON(500, gin.H{
+				"message": fmt.Sprintf("Error setting value %s", err),
+			})
+			return
+		}
+
+		ctx.JSON(200, gin.H{
+			"data":    values,
+			"message": "Values Found",
 		})
 	}
 }

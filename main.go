@@ -24,7 +24,8 @@ func main() {
 	router.GET("/ping", routes.HandlePing())
 	router.POST("/db/test", routes.HandleSet(kvStore))
 	router.GET("/db/test", routes.HandleGet(kvStore))
-	router.POST("/file/upload", routes.HandleUpload(kvStore))
+	router.POST("/file", routes.HandleUpload(kvStore))
+	router.GET("/file", routes.HandleFileMetadata(kvStore))
 
 	router.Run()
 }
