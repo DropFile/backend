@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gin-contrib/cors"
+	// "github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,9 +26,9 @@ func main() {
 	router := gin.Default()
 	router.Use(addHeaders)
 
-	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
-	router.Use(cors.New(config))
+	// config := cors.DefaultConfig()
+	// config.AllowAllOrigins = true
+	// router.Use(cors.New(config))
 	router.StaticFS("/file/fetch", http.Dir(fmt.Sprintf("%s/", routes.Filestorage)))
 
 	router.GET("/ping", routes.HandlePing())
