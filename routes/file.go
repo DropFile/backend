@@ -1,21 +1,26 @@
 package routes
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 
-	"cloud/backend/database"
 	"cloud/backend/utils"
+
+	"io"
 
 	"github.com/gin-gonic/gin"
 )
 
-const Filestorage string = "~/mountdir/filestorage"
+const Filestorage string = "./filestorage"
+const dbURL = "http://localhost:8000"
 
-func HandleUpload(kvStore *database.KVStore) gin.HandlerFunc {
+func HandleUpload() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		key, err := utils.GenerateRandomString(20)
 		if err != nil {
@@ -83,8 +88,25 @@ func HandleUpload(kvStore *database.KVStore) gin.HandlerFunc {
 
 		wg.Wait()
 
+		data := map[string]string{
+			"key":   key,
+			"value": strings.Join(fileNames, ","),
+		}
+
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			log.Println(err)
+		}
+
 		// set the key
-		if err := kvStore.Set(key, fileNames); err != nil {
+		resp, err := http.Post(fmt.Sprintf("%s/set", dbURL), "application/json", bytes.NewBuffer(jsonData))
+		if err != nil {
+			log.Println("Error sending /set Request")
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			log.Printf("Error %d - %s\n", resp.StatusCode, resp.Status)
 			ctx.JSON(500, gin.H{
 				"message": fmt.Sprintf("Error setting value: %v", err),
 			})
@@ -100,20 +122,34 @@ func HandleUpload(kvStore *database.KVStore) gin.HandlerFunc {
 	}
 }
 
-func HandleFileMetadata(kvStore *database.KVStore) gin.HandlerFunc {
+func HandleFileMetadata() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		key := ctx.Query("key")
 
-		values, err := kvStore.Get(key)
+		resp, err := http.Get(fmt.Sprintf("%s/get?key=%s", dbURL, key))
 		if err != nil {
+			log.Println("Error sending /set Request")
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			log.Printf("Error %d - %s\n", resp.StatusCode, resp.Status)
 			ctx.JSON(500, gin.H{
-				"message": fmt.Sprintf("Error setting value %s", err),
+				"message": fmt.Sprintf("Error getting value: %v", err),
 			})
 			return
 		}
 
+		body, err := io.ReadAll(io.Reader(resp.Body))
+
+		if err != nil {
+			ctx.JSON(500, gin.H{
+				"message": fmt.Sprintf("Error reading response: %v", err),
+			})
+		}
+
 		ctx.JSON(200, gin.H{
-			"data":    values,
+			"data":    string(body),
 			"message": "Values Found",
 		})
 	}
