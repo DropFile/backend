@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 )
@@ -92,4 +94,51 @@ func SegmentVideoFile(filePath string, fileName string) error {
 		err = cmd.Run()
 	}
 	return err
+}
+
+func WriteJson(jsonFilePath, key, value string) error {
+	file, err := os.Open(jsonFilePath)
+	if err != nil {
+		log.Fatal("Error opening JSON file:", err)
+	}
+	defer file.Close()
+	jsonReader := json.NewDecoder(file)
+	var data map[string]interface{}
+	if err := jsonReader.Decode(&data); err != nil {
+		log.Fatal("Error decoding JSON:", err)
+	}
+	data[key] = value
+	writeFile, err := os.Create(jsonFilePath)
+	if err != nil {
+		log.Fatal("Error opening JSON file for writing:", err)
+	}
+	defer writeFile.Close()
+	jsonWriter := json.NewEncoder(writeFile)
+	if err := jsonWriter.Encode(data); err != nil {
+		log.Fatal("Error encoding and writing JSON:", err)
+	}
+	return nil
+}
+
+func GetValueForKey(jsonFilePath string, key string) (string, error) {
+	file, err := os.Open(jsonFilePath)
+	if err != nil {
+		return "", fmt.Errorf("error opening JSON file: %w", err)
+	}
+	defer file.Close()
+	jsonReader := json.NewDecoder(file)
+	var data map[string]interface{}
+	if err := jsonReader.Decode(&data); err != nil {
+		return "", fmt.Errorf("error decoding JSON: %w", err)
+	}
+	value, exists := data[key]
+	if !exists {
+		return "", fmt.Errorf("key %s not found in JSON", key)
+	}
+
+	strValue, ok := value.(string)
+	if !ok {
+		return "", fmt.Errorf("value for key %s is not a string", key)
+	}
+	return strValue, nil
 }

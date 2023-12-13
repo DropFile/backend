@@ -1,24 +1,19 @@
 package routes
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 
 	"cloud/backend/utils"
 
-	"io"
-
 	"github.com/gin-gonic/gin"
 )
 
 const Filestorage string = "./filestorage"
-const dbURL = "http://localhost:8001"
+const jsonFilePath string = "./db.json"
 
 func HandleUpload() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -88,29 +83,11 @@ func HandleUpload() gin.HandlerFunc {
 
 		wg.Wait()
 
-		data := map[string]string{
-			"key":   key,
-			"value": strings.Join(fileNames, ","),
-		}
-
-		jsonData, err := json.Marshal(data)
+		combinedValue := strings.Join(fileNames, ",")
+		fmt.Println(combinedValue)
+		err = utils.WriteJson(jsonFilePath, key, combinedValue)
 		if err != nil {
-			log.Println(err)
-		}
-
-		// set the key
-		resp, err := http.Post(fmt.Sprintf("%s/set", dbURL), "application/json", bytes.NewBuffer(jsonData))
-		if err != nil {
-			log.Println("Error sending /set Request")
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			log.Printf("Error %d - %s\n", resp.StatusCode, resp.Status)
-			ctx.JSON(500, gin.H{
-				"message": fmt.Sprintf("Error setting value: %v", err),
-			})
-			return
+			log.Fatal("Error writing to JSON")
 		}
 
 		ctx.JSON(200, gin.H{
@@ -126,30 +103,16 @@ func HandleFileMetadata() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		key := ctx.Query("key")
 
-		resp, err := http.Get(fmt.Sprintf("%s/get?key=%s", dbURL, key))
-		if err != nil {
-			log.Println("Error sending /set Request")
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			log.Printf("Error %d - %s\n", resp.StatusCode, resp.Status)
-			ctx.JSON(500, gin.H{
-				"message": fmt.Sprintf("Error getting value: %v", err),
-			})
-			return
-		}
-
-		body, err := io.ReadAll(io.Reader(resp.Body))
+		result, err := utils.GetValueForKey(jsonFilePath, key)
 
 		if err != nil {
 			ctx.JSON(500, gin.H{
-				"message": fmt.Sprintf("Error reading response: %v", err),
+				"message": "Can't find any value",
 			})
 		}
 
 		ctx.JSON(200, gin.H{
-			"data":    string(body),
+			"data":    string(result),
 			"message": "Values Found",
 		})
 	}
