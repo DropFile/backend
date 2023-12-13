@@ -27,6 +27,6 @@ func main() {
 	router.POST("/file", routes.HandleUpload())
 	router.GET("/file", routes.HandleFileMetadata())
 
-	router.Run("localhost:8001")
+	router.Run()
 }
 

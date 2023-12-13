@@ -18,7 +18,7 @@ import (
 )
 
 const Filestorage string = "./filestorage"
-const dbURL = "http://localhost:8000"
+const dbURL = "http://localhost:8001"
 
 func HandleUpload() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
