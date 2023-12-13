@@ -53,13 +53,30 @@ func HandleUpload(kvStore *database.KVStore) gin.HandlerFunc {
 
 				formFileForm := fmt.Sprintf("file-%d", index)
 				file, err := ctx.FormFile(formFileForm)
+
 				if err == nil {
 					fileName := strings.Replace(file.Filename, " ", "_", -1)
-					fileNames = append(fileNames, fileName)
-					filePath := fmt.Sprintf("%s/%s", fileStoragePath, fileName)
-					if err := ctx.SaveUploadedFile(file, filePath); err != nil {
-						log.Printf("Error saving file %s : %v\n", fileName, err)
+					fileExtension, fileError := utils.GetFilExtension(fileName)
+					
+
+					if fileError != nil {
+						log.Printf("%s: %v\n", fileName, fileError)
 					}
+
+					if fileExtension == "mp4" {
+						fileNames = append(fileNames, fileName)
+						filePath := fmt.Sprintf("%s/%s", fileStoragePath, fileName)
+						err := ctx.SaveUploadedFile(file, filePath)
+						if err != nil {
+							log.Printf("Error saving file %s : %v\n", fileName, err)
+						} else {
+							err := utils.SegmentVideoFile(filePath, fileName)
+							if err != nil {
+								log.Printf("Error Segmenting File %s : %v\n", fileName, err)
+							}
+						}
+					}
+
 				}
 			}(num)
 		}
