@@ -9,7 +9,7 @@ import (
 
 func CreateFolder(folderPath string) error {
 	fmt.Println(folderPath)
-	err := os.Mkdir(folderPath, 777)
+	err := os.MkdirAll(folderPath, 0755)
 	return err
 }
 
