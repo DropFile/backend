@@ -58,18 +58,37 @@ func SegmentVideoFile(filePath string, fileName string) error {
 		"-i", filePath,
 		"-c:v", "libx264",
 		"-c:a", "aac",
-		"-b:a", "128k",
-		"-map", "0:0",
-		"-f", "segment",
-		"-segment_time", "10",
-		"-segment_list", fmt.Sprintf("%slist.m3u8", filePath),
-		"-segment_format", "mp4",
-		fmt.Sprintf("%s%%03d.%s", filePath, "mp4"),
+		"-profile:v", "baseline",
+		"-b:v", "400k",
+		"-b:a", "64k",
+		"-hls_time", "10",
+		"-hls_list_size", "0",
+		"-s", "640x360",
+		"-start_number", "0",
+		filePath+".m3u8",
 	)
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	err := cmd.Run()
+
+	if err != nil {
+		cmd := exec.Command("ffmpeg",
+			"-i", filePath+".m3u8",
+			"-c", "copy",
+			"-bsf:a", "aac_adtstoasc",
+			"-hls_time", "10",
+			"-hls_list_size", "0",
+			"-start_number", "0",
+			"-f", "hls",
+			filePath+"playlist.m3u8",
+		)
+
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		err = cmd.Run()
+	}
 	return err
 }

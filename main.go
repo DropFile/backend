@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const dbPath string = "../../database"
+const dbPath string = "./db"
 
 func main() {
 
@@ -24,6 +24,7 @@ func main() {
 	defer kvStore.Close()
 
 	router := gin.Default()
+	router.Use(addHeaders)
 
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
@@ -37,4 +38,10 @@ func main() {
 	router.GET("/file", routes.HandleFileMetadata(kvStore))
 
 	router.Run()
+}
+
+// addHeaders will act as middleware to give us CORS support
+func addHeaders(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Next()
 }

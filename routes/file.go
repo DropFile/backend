@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const Filestorage string = "../../filestorage"
+const Filestorage string = "./filestorage"
 
 func HandleUpload(kvStore *database.KVStore) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -117,4 +117,3 @@ func HandleFileMetadata(kvStore *database.KVStore) gin.HandlerFunc {
 		})
 	}
 }
-
