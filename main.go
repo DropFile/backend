@@ -10,5 +10,5 @@ func main() {
 	router := gin.Default()
 	router.GET("/ping", routes.Ping)
 
-	router.Run("localhost:8080")
+	router.Run()
 }
