@@ -8,8 +8,9 @@ import (
 	"log"
 )
 
+const dbPath string = "../../database"
+
 func main() {
-	dbPath := "../../database"
 
 	// database connection
 	kvStore, err := database.NewKVStore(dbPath)
@@ -21,8 +22,9 @@ func main() {
 	router := gin.Default()
 
 	router.GET("/ping", routes.HandlePing())
-	router.POST("/test", routes.HandleSet(kvStore))
-	router.GET("/test", routes.HandleGet(kvStore))
+	router.POST("/db/test", routes.HandleSet(kvStore))
+	router.GET("/db/test", routes.HandleGet(kvStore))
+	router.POST("/file/upload", routes.HandleUpload(kvStore))
 
 	router.Run()
 }
