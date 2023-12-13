@@ -24,6 +24,7 @@ func HandleUpload(kvStore *database.KVStore) gin.HandlerFunc {
 			})
 			return
 		}
+		fmt.Println(key)
 
 		fileStoragePath := fmt.Sprintf("%s/%s", Filestorage, key)
 		err = utils.CreateFolder(fileStoragePath)
