@@ -24,7 +24,7 @@ func main() {
 	defer kvStore.Close()
 
 	router := gin.Default()
-	router.Use(addHeaders)
+	// router.Use(addHeaders)
 
 	// config := cors.DefaultConfig()
 	// config.AllowAllOrigins = true
