@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const dbPath string = "./db"
+const dbPath string = "~/mountdir/db"
 
 func main() {
 
